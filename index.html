@@ -142,5 +142,65 @@
 <script src="config.js"></script>
 <script src="app.js"></script>
   <script src="auth.js"></script>
+  <section id="account-section" style="background:#071b36;color:white;padding:30px 20px;text-align:center;">
+  <h2 style="color:#d4af37;">Join GospelWave</h2>
+  <p>Create your account and become part of the global gospel music community.</p>
+
+  <div style="max-width:400px;margin:25px auto;">
+    <h3>Create Account</h3>
+
+    <form id="register-form">
+      <input id="reg-name" type="text" placeholder="Full Name" required style="width:100%;padding:13px;margin:7px 0;box-sizing:border-box;">
+      <input id="reg-email" type="email" placeholder="Email Address" required style="width:100%;padding:13px;margin:7px 0;box-sizing:border-box;">
+      <input id="reg-password" type="password" placeholder="Password (at least 6 characters)" minlength="6" required style="width:100%;padding:13px;margin:7px 0;box-sizing:border-box;">
+      <button type="submit" style="width:100%;padding:14px;background:#d4af37;color:#071b36;border:0;font-weight:bold;margin-top:10px;">Create Account</button>
+    </form>
+
+    <p id="register-message"></p>
+
+    <hr style="margin:30px 0;border-color:#d4af37;">
+
+    <h3>Already have an account?</h3>
+
+    <form id="login-form">
+      <input id="login-email" type="email" placeholder="Email Address" required style="width:100%;padding:13px;margin:7px 0;box-sizing:border-box;">
+      <input id="login-password" type="password" placeholder="Password" required style="width:100%;padding:13px;margin:7px 0;box-sizing:border-box;">
+      <button type="submit" style="width:100%;padding:14px;background:#d4af37;color:#071b36;border:0;font-weight:bold;margin-top:10px;">Sign In</button>
+    </form>
+
+    <p id="login-message"></p>
+  </div>
+</section>
+
+<script>
+document.getElementById("register-form").addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const message = document.getElementById("register-message");
+  message.textContent = "Creating your account...";
+
+  const result = await window.registerGospelWaveUser(
+    document.getElementById("reg-name").value,
+    document.getElementById("reg-email").value,
+    document.getElementById("reg-password").value
+  );
+
+  message.textContent = result.message;
+});
+
+document.getElementById("login-form").addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const message = document.getElementById("login-message");
+  message.textContent = "Signing in...";
+
+  const result = await window.loginGospelWaveUser(
+    document.getElementById("login-email").value,
+    document.getElementById("login-password").value
+  );
+
+  message.textContent = result.message;
+});
+</script>
 </body>
 </html>
