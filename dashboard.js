@@ -83,9 +83,8 @@ function showGospelWaveDashboard(user) {
     };
 
     document.getElementById("gw-artist").onclick = function() {
-      document.getElementById("gw-dashboard-message").textContent =
-        "Artist applications are coming next. Your artist profile will require approval.";
-    };
+  showGospelWaveArtistApplication(user);
+};
 
     document.getElementById("gw-downloads").onclick = function() {
       document.getElementById("gw-dashboard-message").textContent =
