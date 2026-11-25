@@ -128,3 +128,78 @@ function showGospelWaveDashboard(user) {
 }
 
 window.showGospelWaveDashboard = showGospelWaveDashboard;
+
+async function showGospelWaveArtistApplication(user) {
+  const area = document.getElementById("gw-dashboard-message");
+
+  area.innerHTML = `
+    <div style="background:#10264a;padding:22px;border-radius:12px;margin-top:20px;">
+      <h2 style="color:#d4af37;">Artist Application</h2>
+      <p>Introduce yourself to the GospelWave global music community.</p>
+
+      <form id="gw-artist-form">
+        <input id="gw-artist-name" required
+          placeholder="Artist or Stage Name"
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;">
+
+        <input id="gw-artist-country" required
+          placeholder="Country"
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;">
+
+        <textarea id="gw-artist-bio" required
+          placeholder="Tell us about yourself and your gospel music ministry"
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;min-height:120px;"></textarea>
+
+        <label style="display:block;margin:12px 0;">
+          <input type="checkbox" id="gw-artist-rights" required>
+          I confirm that I own or have authorisation to submit the music I upload.
+        </label>
+
+        <button type="submit"
+          style="padding:14px;background:#d4af37;color:#071b36;border:0;border-radius:6px;font-weight:bold;">
+          Submit Artist Application
+        </button>
+      </form>
+
+      <p id="gw-artist-result"></p>
+    </div>
+  `;
+
+  document.getElementById("gw-artist-form").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const result = document.getElementById("gw-artist-result");
+    result.textContent = "Submitting your application...";
+
+    const { data: sessionData } =
+      await window.gospelwaveDB.auth.getUser();
+
+    const currentUser = sessionData.user;
+
+    if (!currentUser || currentUser.id !== user.id) {
+      result.textContent = "Please sign in again.";
+      return;
+    }
+
+    const { error } = await window.gospelwaveDB
+      .from("artists")
+      .insert({
+        owner_id: currentUser.id,
+        artist_name: document.getElementById("gw-artist-name").value.trim(),
+        country: document.getElementById("gw-artist-country").value.trim(),
+        biography: document.getElementById("gw-artist-bio").value.trim(),
+        verification_status: "pending"
+      });
+
+    if (error) {
+      result.textContent = "Application could not be submitted: " + error.message;
+      return;
+    }
+
+    result.textContent =
+      "Your artist application has been submitted successfully! It is awaiting administrator approval.";
+
+    document.getElementById("gw-artist-form").reset();
+  });
+}
+
