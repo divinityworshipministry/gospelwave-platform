@@ -83,6 +83,7 @@ function showGospelWaveDashboard(user) {
     };
 
     document.getElementById("gw-artist").onclick = function() {
+  alert("Artist button is responding!");
   showGospelWaveArtistApplication(user);
 };
 
