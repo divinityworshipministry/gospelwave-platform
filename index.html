@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Discover, promote and enjoy gospel music from around the world.">
+  <title>GospelWave | Gospel Music Worldwide</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #0b1020;
+      color: #fff;
+      line-height: 1.6;
+    }
+    header {
+      background: #10182d;
+      padding: 18px 7%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .logo { color: #f5c451; font-size: 27px; font-weight: bold; }
+    nav { display: flex; flex-wrap: wrap; gap: 18px; }
+    nav a { color: white; text-decoration: none; font-size: 14px; }
+    nav a:hover { color: #f5c451; }
+    .hero {
+      padding: 85px 7%;
+      text-align: center;
+      background: linear-gradient(135deg, #10182d, #26365e);
+    }
+    .hero h1 { font-size: clamp(36px, 7vw, 58px); line-height: 1.2; margin-bottom: 20px; }
+    .hero h1 span { color: #f5c451; }
+    .hero p { max-width: 650px; margin: 0 auto 28px; color: #d2d8e8; font-size: 17px; }
+    .button {
+      display: inline-block;
+      padding: 12px 23px;
+      margin: 5px;
+      border-radius: 7px;
+      background: #f5c451;
+      color: #10182d;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .button.secondary { background: transparent; color: white; border: 1px solid #f5c451; }
+    section { padding: 55px 7%; }
+    .section-title { font-size: 27px; margin-bottom: 22px; }
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 15px;
+    }
+    .category {
+      background: #17223c;
+      padding: 23px 12px;
+      text-align: center;
+      border-radius: 10px;
+      border: 1px solid #283653;
+    }
+    .category span { display: block; font-size: 29px; margin-bottom: 8px; }
+    .music-area {
+      background: #17223c;
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+    }
+    .music-area p { color: #c4cde0; margin-bottom: 15px; }
+    .artist-section { text-align: center; background: #10182d; }
+    .artist-section p { max-width: 650px; margin: 0 auto 20px; color: #c4cde0; }
+    footer {
+      text-align: center;
+      padding: 28px 7%;
+      background: #080d19;
+      color: #b9c2d5;
+      font-size: 14px;
+    }
+    footer strong { color: #f5c451; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">♫ GospelWave</div>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#discover">Discover</a>
+      <a href="#artists">Artists</a>
+      <a href="#about">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <h1>Let the Gospel Sound<br><span>Reach the World</span></h1>
+      <p>Discover inspiring gospel music, explore talented artists and support the voices spreading the message of Jesus Christ around the world.</p>
+      <a class="button" href="#discover">Discover Music</a>
+      <a class="button secondary" href="#artists">Join as an Artist</a>
+    </section>
+
+    <section id="discover">
+      <h2 class="section-title">Explore Gospel Music</h2>
+      <div class="categories">
+        <div class="category"><span>🎤</span>Afro Gospel</div>
+        <div class="category"><span>🙌</span>Praise</div>
+        <div class="category"><span>🙏</span>Worship</div>
+        <div class="category"><span>🎹</span>Contemporary Gospel</div>
+        <div class="category"><span>🎼</span>Hymns</div>
+        <div class="category"><span>🎧</span>Gospel Hip Hop</div>
+        <div class="category"><span>🎸</span>Gospel Reggae</div>
+        <div class="category"><span>🎶</span>Choir Music</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="music-area">
+        <h2 class="section-title">Your Gospel Music Destination</h2>
+        <p>Find new songs, discover independent gospel artists and enjoy music made to inspire faith.</p>
+        <p>Free and authorised paid downloads will be available through GospelWave.</p>
+        <a class="button" href="#artists">Explore the Platform</a>
+      </div>
+    </section>
+
+    <section class="artist-section" id="artists">
+      <h2 class="section-title">Are You a Gospel Artist?</h2>
+      <p>Share your music with listeners around the world. GospelWave is being developed to help gospel artists showcase their work and reach new audiences.</p>
+      <a class="button" href="mailto:info@gospelwave.com">Artist Information</a>
+    </section>
+
+    <section id="about">
+      <h2 class="section-title">About GospelWave</h2>
+      <p>GospelWave is a platform being built to connect gospel musicians and listeners worldwide through music discovery, artist promotion and authorised music downloads.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p><strong>GospelWave</strong> — Let the Gospel Sound Reach the World.</p>
+    <p>© 2026 GospelWave. All rights reserved.</p>
+  </footer>
+</body>
+</html>
