@@ -214,7 +214,9 @@ async function showGospelWaveArtistApplication(user) {
 
     document.getElementById("gw-artist-form").reset();
   });
-}async function showGospelWaveAdminDashboard(user) {
+}
+
+async function showGospelWaveAdminDashboard(user) {
   if (user.app_metadata?.role !== "admin") {
     alert("Access denied. Administrators only.");
     return;
