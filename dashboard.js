@@ -250,9 +250,9 @@ async function showGospelWaveArtistApplication(user) {
   }
 
   if (!data || data.length === 0) {
-    list.textContent = "There are no pending artist applications.";
-    return;
-  }
+  list.textContent = "There are no pending artist applications.";
+} else {
+  data.forEach(function(artist) {
 
   data.forEach(function(artist) {
     const card = document.createElement("div");
