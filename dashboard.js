@@ -525,5 +525,57 @@ async function loadPendingRights() {
     area.appendChild(card);
   }
 }
-  
+async function updateMusicRights(rightsId, status) {
+  const { data: authData, error: authError } =
+    await window.gospelwaveDB.auth.getUser();
+
+  if (authError || !authData.user ||
+      authData.user.app_metadata?.role !== "admin") {
+    alert("Access denied. Administrators only.");
+    return;
+  }
+
+  if (!["approved", "rejected"].includes(status)) {
+    alert("Invalid rights review status.");
+    return;
+  }
+
+  if (status === "approved") {
+    const { data: rights, error: checkError } =
+      await window.gospelwaveDB
+        .from("music_rights")
+        .select("recording_rights_confirmed, composition_rights_confirmed, download_permission_confirmed, document_path")
+        .eq("id", rightsId)
+        .single();
+
+    if (checkError || !rights) {
+      alert("Could not verify rights submission.");
+      return;
+    }
+
+    if (
+      !rights.recording_rights_confirmed ||
+      !rights.composition_rights_confirmed ||
+      !rights.download_permission_confirmed ||
+      !rights.document_path
+    ) {
+      alert("All rights confirmations and a supporting document are required.");
+      return;
+    }
+  }
+
+  const { error } = await window.gospelwaveDB
+    .from("music_rights")
+    .update({ review_status: status })
+    .eq("id", rightsId);
+
+  if (error) {
+    alert("Rights review failed: " + error.message);
+    return;
+  }
+
+  alert("Music rights " + status + " successfully.");
+
+  await loadPendingRights();
+}
 
