@@ -227,6 +227,11 @@ async function showGospelWaveArtistApplication(user) {
       <h2 style="color:#d4af37;">GospelWave Admin</h2>
       <h3>Artist Applications</h3>
       <p>Review and manage pending artist applications.</p>
+      <hr style="border:1px solid #d4af37;margin:25px 0;">
+
+<h3>Song Submissions</h3>
+<p>Review and manage songs submitted by GospelWave artists.</p>
+<div id="gw-pending-songs">Loading song submissions...</div>
       <div id="gw-pending-artists">Loading applications...</div>
     </div>
   `;
