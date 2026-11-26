@@ -286,6 +286,9 @@ async function showGospelWaveArtistApplication(user) {
     card.append(name, details, approve, reject);
     list.appendChild(card);
   });
+      }
+}
+
 }async function updateArtistApplication(artistId, status) {
   const { data: authData, error: authError } =
     await window.gospelwaveDB.auth.getUser();
