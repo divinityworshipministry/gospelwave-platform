@@ -285,8 +285,10 @@ async function showGospelWaveArtistApplication(user) {
 
     card.append(name, details, approve, reject);
     list.appendChild(card);
-  });
-      }
+    });
+    }
+
+  await loadPendingSongs();
 }
 
 }async function updateArtistApplication(artistId, status) {
