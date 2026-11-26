@@ -88,16 +88,38 @@ function showGospelWaveDashboard(user) {
       area.textContent = data.map(item => item.name).join(" • ");
     };
 
-    document.getElementById("gw-artist").onclick = function() {
+    document.getElementById("gw-artist").onclick = async function() {
+  const { data: artists, error } = await window.gospelwaveDB
+    .from("artists")
+    .select("id, verification_status")
+    .eq("owner_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  const area = document.getElementById("gw-dashboard-message");
+
+  if (error) {
+    area.textContent = "Unable to check your artist status: " + error.message;
+    return;
+  }
+
+  if (!artists || artists.length === 0) {
+    showGospelWaveArtistApplication(user);
+    return;
+  }
+
+  if (artists[0].verification_status === "verified") {
+    showGospelWaveSongSubmission(user, artists[0].id);
+    return;
+  }
+
+  if (artists[0].verification_status === "pending") {
+    area.textContent = "Your artist application is awaiting administrator approval.";
+    return;
+  }
+
   showGospelWaveArtistApplication(user);
 };
-    const adminButton = document.getElementById("gw-admin");
-
-if (adminButton) {
-  adminButton.onclick = function() {
-    showGospelWaveAdminDashboard(user);
-  };
-}
 
     document.getElementById("gw-downloads").onclick = function() {
       document.getElementById("gw-dashboard-message").textContent =
