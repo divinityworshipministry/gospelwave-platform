@@ -41,7 +41,13 @@ function showGospelWaveDashboard(user) {
             <h3>🎤 Become an Artist</h3>
             <p>Apply to create your artist profile and submit music.</p>
             <button id="gw-artist" style="padding:12px;background:#d4af37;border:0;border-radius:6px;font-weight:bold;">Artist Application</button>
-          </div>
+          </div>${user.app_metadata?.role === "admin" ? `
+<div style="background:#10264a;padding:20px;border-radius:12px;margin-bottom:15px;">
+  <h3>🛡️ Admin Dashboard</h3>
+  <p>Manage artist applications and GospelWave content.</p>
+  <button id="gw-admin" style="padding:12px;background:#d4af37;border:0;border-radius:6px;font-weight:bold;">Open Admin Dashboard</button>
+</div>
+` : ""}
 
           <div style="background:#10264a;padding:20px;border-radius:12px;">
             <h3>⬇️ My Downloads</h3>
