@@ -284,6 +284,20 @@ async function showGospelWaveArtistApplication(user) {
     list.appendChild(card);
   });
 }async function updateArtistApplication(artistId, status) {
+  const { data: authData, error: authError } =
+    await window.gospelwaveDB.auth.getUser();
+
+  if (authError || !authData.user ||
+      authData.user.app_metadata?.role !== "admin") {
+    alert("Access denied. Administrators only.");
+    return;
+  }
+
+  if (!["verified", "rejected"].includes(status)) {
+    alert("Invalid application status.");
+    return;
+  }
+
   const { error } = await window.gospelwaveDB
     .from("artists")
     .update({ verification_status: status })
@@ -293,6 +307,11 @@ async function showGospelWaveArtistApplication(user) {
     alert("Update failed: " + error.message);
     return;
   }
+
+  alert("Artist application " + status + " successfully.");
+
+  showGospelWaveAdminDashboard(authData.user);
+}
 
   alert("Artist application " + status + " successfully.");
 
