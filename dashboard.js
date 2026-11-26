@@ -89,9 +89,15 @@ function showGospelWaveDashboard(user) {
     };
 
     document.getElementById("gw-artist").onclick = function() {
-  alert("Artist button is responding!");
   showGospelWaveArtistApplication(user);
 };
+    const adminButton = document.getElementById("gw-admin");
+
+if (adminButton) {
+  adminButton.onclick = function() {
+    showGospelWaveAdminDashboard(user);
+  };
+}
 
     document.getElementById("gw-downloads").onclick = function() {
       document.getElementById("gw-dashboard-message").textContent =
@@ -208,4 +214,90 @@ async function showGospelWaveArtistApplication(user) {
 
     document.getElementById("gw-artist-form").reset();
   });
+}async function showGospelWaveAdminDashboard(user) {
+  if (user.app_metadata?.role !== "admin") {
+    alert("Access denied. Administrators only.");
+    return;
+  }
+
+  const area = document.getElementById("gw-dashboard-message");
+
+  area.innerHTML = `
+    <div style="background:#10264a;padding:20px;border-radius:12px;">
+      <h2 style="color:#d4af37;">GospelWave Admin</h2>
+      <h3>Artist Applications</h3>
+      <p>Review and manage pending artist applications.</p>
+      <div id="gw-pending-artists">Loading applications...</div>
+    </div>
+  `;
+
+  const list = document.getElementById("gw-pending-artists");
+
+  const { data, error } = await window.gospelwaveDB
+    .from("artists")
+    .select("id, artist_name, country, biography, created_at")
+    .eq("verification_status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    list.textContent = "Error loading applications: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    list.textContent = "There are no pending artist applications.";
+    return;
+  }
+
+  data.forEach(function(artist) {
+    const card = document.createElement("div");
+    card.style.cssText =
+      "background:#071b36;padding:15px;margin-top:15px;border-radius:8px;";
+
+    const name = document.createElement("h3");
+    name.textContent = artist.artist_name;
+
+    const details = document.createElement("p");
+    details.textContent =
+      "Country: " + (artist.country || "Not provided") +
+      " | Biography: " + (artist.biography || "Not provided");
+
+    const approve = document.createElement("button");
+    approve.textContent = "Approve";
+    approve.style.cssText =
+      "padding:10px;background:#168a45;color:white;border:0;margin-right:10px;";
+
+    const reject = document.createElement("button");
+    reject.textContent = "Reject";
+    reject.style.cssText =
+      "padding:10px;background:#b52b35;color:white;border:0;";
+
+    approve.onclick = function() {
+      updateArtistApplication(artist.id, "verified");
+    };
+
+    reject.onclick = function() {
+      updateArtistApplication(artist.id, "rejected");
+    };
+
+    card.append(name, details, approve, reject);
+    list.appendChild(card);
+  });
+}async function updateArtistApplication(artistId, status) {
+  const { error } = await window.gospelwaveDB
+    .from("artists")
+    .update({ verification_status: status })
+    .eq("id", artistId);
+
+  if (error) {
+    alert("Update failed: " + error.message);
+    return;
+  }
+
+  alert("Artist application " + status + " successfully.");
+
+  const user = (await window.gospelwaveDB.auth.getUser()).data.user;
+
+  showGospelWaveAdminDashboard(user);
 }
+
