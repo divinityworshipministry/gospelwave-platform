@@ -253,8 +253,6 @@ async function showGospelWaveArtistApplication(user) {
   list.textContent = "There are no pending artist applications.";
 } else {
   data.forEach(function(artist) {
-
-  data.forEach(function(artist) {
     const card = document.createElement("div");
     card.style.cssText =
       "background:#071b36;padding:15px;margin-top:15px;border-radius:8px;";
