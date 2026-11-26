@@ -294,7 +294,8 @@ async function showGospelWaveArtistApplication(user) {
     }
 
   await loadPendingSongs();
-}
+  await loadPendingRights();
+  }
 
 async function updateArtistApplication(artistId, status) {
   const { data: authData, error: authError } =
@@ -437,6 +438,92 @@ async function updateSongSubmission(songId, status) {
 
   await loadPendingSongs();
 }
+async function loadPendingRights() {
+  const area = document.getElementById("gw-pending-rights");
 
+  if (!area) return;
+
+  area.textContent = "Loading rights submissions...";
+
+  const { data, error } = await window.gospelwaveDB
+    .from("music_rights")
+    .select("*")
+    .eq("review_status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    area.textContent = "Error loading rights submissions: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    area.textContent = "There are no pending music-rights submissions.";
+    return;
+  }
+
+  area.innerHTML = "";
+
+  for (const item of data) {
+    const card = document.createElement("div");
+
+    card.style.cssText =
+      "background:#071b36;padding:15px;margin-top:15px;border-radius:8px;";
+
+    const heading = document.createElement("h3");
+    heading.textContent = "Rights Holder: " +
+      (item.rights_holder_name || "Not provided");
+
+    const details = document.createElement("p");
+    details.textContent =
+      "Song ID: " + item.song_id +
+      " | Recording rights: " + (item.recording_rights_confirmed ? "Yes" : "No") +
+      " | Composition rights: " + (item.composition_rights_confirmed ? "Yes" : "No") +
+      " | Download permission: " + (item.download_permission_confirmed ? "Yes" : "No");
+
+    card.append(heading, details);
+
+    if (item.document_path) {
+      const { data: fileData, error: fileError } =
+        await window.gospelwaveDB.storage
+          .from("rights-documents")
+          .createSignedUrl(item.document_path, 300);
+
+      if (!fileError && fileData?.signedUrl) {
+        const link = document.createElement("a");
+        link.href = fileData.signedUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "View Supporting Document";
+        link.style.color = "#d4af37";
+        card.appendChild(link);
+      } else {
+        const warning = document.createElement("p");
+        warning.textContent = "Supporting document could not be opened.";
+        card.appendChild(warning);
+      }
+    }
+
+    const approve = document.createElement("button");
+    approve.textContent = "Approve Rights";
+    approve.style.cssText =
+      "padding:10px;background:#168a45;color:white;border:0;margin:12px 10px 0 0;";
+
+    const reject = document.createElement("button");
+    reject.textContent = "Reject Rights";
+    reject.style.cssText =
+      "padding:10px;background:#b52b35;color:white;border:0;";
+
+    approve.onclick = function() {
+      updateMusicRights(item.id, "approved");
+    };
+
+    reject.onclick = function() {
+      updateMusicRights(item.id, "rejected");
+    };
+
+    card.append(approve, reject);
+    area.appendChild(card);
+  }
+}
   
 
