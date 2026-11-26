@@ -313,10 +313,5 @@ async function showGospelWaveArtistApplication(user) {
   showGospelWaveAdminDashboard(authData.user);
 }
 
-  alert("Artist application " + status + " successfully.");
-
-  const user = (await window.gospelwaveDB.auth.getUser()).data.user;
-
-  showGospelWaveAdminDashboard(user);
-}
+  
 
