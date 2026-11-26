@@ -321,5 +321,117 @@ async function updateArtistApplication(artistId, status) {
   showGospelWaveAdminDashboard(authData.user);
 }
 
+async function loadPendingSongs() {
+  const area = document.getElementById("gw-pending-songs");
+
+  if (!area) return;
+
+  area.textContent = "Loading song submissions...";
+
+  const { data, error } = await window.gospelwaveDB
+    .from("songs")
+    .select("id, title, country, language, download_type, download_price, created_at")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    area.textContent = "Error loading songs: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    area.textContent = "There are no pending song submissions.";
+    return;
+  }
+
+  area.innerHTML = "";
+
+  data.forEach(function(song) {
+    const card = document.createElement("div");
+
+    card.style.cssText =
+      "background:#071b36;padding:15px;margin-top:15px;border-radius:8px;";
+
+    const title = document.createElement("h3");
+    title.textContent = song.title;
+
+    const details = document.createElement("p");
+    details.textContent =
+      "Country: " + (song.country || "Not provided") +
+      " | Language: " + (song.language || "Not provided") +
+      " | Type: " + (song.download_type || "Not specified");
+
+    const approve = document.createElement("button");
+    approve.textContent = "Approve";
+    approve.style.cssText =
+      "padding:10px;background:#168a45;color:white;border:0;margin-right:10px;";
+
+    const reject = document.createElement("button");
+    reject.textContent = "Reject";
+    reject.style.cssText =
+      "padding:10px;background:#b52b35;color:white;border:0;";
+
+    approve.onclick = function() {
+      updateSongSubmission(song.id, "published");
+    };
+
+    reject.onclick = function() {
+      updateSongSubmission(song.id, "rejected");
+    };
+
+    card.append(title, details, approve, reject);
+    area.appendChild(card);
+  });
+}
+
+async function updateSongSubmission(songId, status) {
+  const { data: authData, error: authError } =
+    await window.gospelwaveDB.auth.getUser();
+
+  if (authError || !authData.user ||
+      authData.user.app_metadata?.role !== "admin") {
+    alert("Access denied. Administrators only.");
+    return;
+  }
+
+  if (!["published", "rejected"].includes(status)) {
+    alert("Invalid song status.");
+    return;
+  }
+  
+  if (status === "published") {
+    const { data: rights, error: rightsError } =
+      await window.gospelwaveDB
+        .from("music_rights")
+        .select("review_status")
+        .eq("song_id", songId)
+        .eq("review_status", "approved")
+        .limit(1);
+
+    if (rightsError) {
+      alert("Could not verify music rights: " + rightsError.message);
+      return;
+    }
+
+    if (!rights || rights.length === 0) {
+      alert("This song cannot be published until its music rights are approved.");
+      return;
+    }
+  }
+  const { error } = await window.gospelwaveDB
+    .from("songs")
+    .update({ status: status })
+    .eq("id", songId);
+
+  if (error) {
+    alert("Song update failed: " + error.message);
+    return;
+  }
+
+  alert("Song " + status + " successfully.");
+
+  await loadPendingSongs();
+}
+
   
 
