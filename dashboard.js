@@ -209,4 +209,3 @@ async function showGospelWaveArtistApplication(user) {
     document.getElementById("gw-artist-form").reset();
   });
 }
-
