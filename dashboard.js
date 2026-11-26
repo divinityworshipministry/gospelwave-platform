@@ -291,7 +291,8 @@ async function showGospelWaveArtistApplication(user) {
   await loadPendingSongs();
 }
 
-}async function updateArtistApplication(artistId, status) {
+}
+async function updateArtistApplication(artistId, status) {
   const { data: authData, error: authError } =
     await window.gospelwaveDB.auth.getUser();
 
