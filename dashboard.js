@@ -603,3 +603,244 @@ async function updateMusicRights(rightsId, status) {
   await loadPendingRights();
 }
 
+async function showGospelWaveSongSubmission(user, artistId) {
+  const area = document.getElementById("gw-dashboard-message");
+
+  const { data: genres, error: genreError } = await window.gospelwaveDB
+    .from("genres")
+    .select("id, name")
+    .order("name");
+
+  if (genreError) {
+    area.textContent = "Unable to load music genres: " + genreError.message;
+    return;
+  }
+
+  area.innerHTML = `
+    <div style="background:#10264a;padding:22px;border-radius:12px;margin-top:20px;color:white;">
+      <h2 style="color:#d4af37;">Submit Your Gospel Music</h2>
+      <p>Upload your song for GospelWave review and publication.</p>
+
+      <form id="gw-song-form">
+        <input id="gw-song-title" required placeholder="Song title"
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;">
+
+        <textarea id="gw-song-description" placeholder="Song description"
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;"></textarea>
+
+        <select id="gw-song-genre" required
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;">
+          <option value="">Select music genre</option>
+          ${genres.map(g => `<option value="${g.id}">${g.name}</option>`).join("")}
+        </select>
+
+        <input id="gw-song-country" required placeholder="Country"
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;">
+
+        <input id="gw-song-language" required placeholder="Song language"
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;">
+
+        <label>Upload audio file (maximum 50MB)</label>
+        <input id="gw-song-audio" type="file" accept="audio/*" required
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;">
+
+        <label>Upload cover artwork (optional)</label>
+        <input id="gw-song-cover" type="file"
+          accept="image/jpeg,image/png,image/webp"
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;">
+
+        <label>Download option</label>
+        <select id="gw-song-download" required
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;">
+          <option value="free">Free download</option>
+          <option value="paid">Paid download</option>
+        </select>
+
+        <input id="gw-song-price" type="number" min="0" step="0.01"
+          placeholder="Download price (for paid songs)"
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;">
+
+        <input id="gw-song-currency" value="NGN" required
+          placeholder="Currency"
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;">
+
+        <h3 style="color:#d4af37;">Music Rights Declaration</h3>
+
+        <input id="gw-rights-holder" required
+          placeholder="Name of copyright/rights holder"
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;">
+
+        <label style="display:block;margin:10px 0;">
+          <input type="checkbox" id="gw-recording-rights" required>
+          I own or have permission for the sound recording.
+        </label>
+
+        <label style="display:block;margin:10px 0;">
+          <input type="checkbox" id="gw-composition-rights" required>
+          I own or have permission for the musical composition.
+        </label>
+
+        <label style="display:block;margin:10px 0;">
+          <input type="checkbox" id="gw-download-rights" required>
+          I have permission to make this music available for download.
+        </label>
+
+        <input id="gw-territories" required
+          placeholder="Territories permitted (e.g. Worldwide)"
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;">
+
+        <label>Upload supporting rights document (PDF, JPEG or PNG)</label>
+        <input id="gw-rights-document" type="file"
+          accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+          required
+          style="width:100%;padding:13px;margin:8px 0;box-sizing:border-box;">
+
+        <button type="submit"
+          style="padding:14px;background:#d4af37;color:#071b36;border:0;border-radius:6px;font-weight:bold;">
+          Submit Song for Approval
+        </button>
+      </form>
+
+      <p id="gw-song-result"></p>
+    </div>
+  `;
+
+  document.getElementById("gw-song-form").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const result = document.getElementById("gw-song-result");
+    const form = document.getElementById("gw-song-form");
+    const audio = document.getElementById("gw-song-audio").files[0];
+    const cover = document.getElementById("gw-song-cover").files[0];
+    const documentFile = document.getElementById("gw-rights-document").files[0];
+    const downloadType = document.getElementById("gw-song-download").value;
+    const price = Number(document.getElementById("gw-song-price").value || 0);
+
+    if (!audio || audio.size > 50 * 1024 * 1024 || !audio.type.startsWith("audio/")) {
+      result.textContent = "Please select a valid audio file not exceeding 50MB.";
+      return;
+    }
+
+    if (cover && (
+      !["image/jpeg", "image/png", "image/webp"].includes(cover.type) ||
+      cover.size > 5 * 1024 * 1024
+    )) {
+      result.textContent = "Cover artwork must be JPEG, PNG or WebP and not exceed 5MB.";
+      return;
+    }
+
+    if (!documentFile ||
+      documentFile.size > 10 * 1024 * 1024 ||
+      !["application/pdf", "image/jpeg", "image/png"].includes(documentFile.type)
+    ) {
+      result.textContent = "Please upload a PDF, JPEG or PNG rights document not exceeding 10MB.";
+      return;
+    }
+
+    if (downloadType === "paid" && price <= 0) {
+      result.textContent = "Enter a valid price for paid downloads.";
+      return;
+    }
+
+    const { data: authData, error: authError } =
+      await window.gospelwaveDB.auth.getUser();
+
+    const currentUser = authData && authData.user;
+
+    if (authError || !currentUser || currentUser.id !== user.id) {
+      result.textContent = "Please sign in again.";
+      return;
+    }
+
+    result.textContent = "Uploading your song and documents. Please wait...";
+    form.querySelector("button[type='submit']").disabled = true;
+
+    const folder = currentUser.id;
+    const fileBase = Date.now() + "-" + Math.random().toString(36).slice(2);
+
+    let audioPath = null;
+    let coverPath = null;
+    let rightsPath = null;
+
+    try {
+      audioPath = folder + "/" + fileBase + "-" +
+        audio.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+      const audioUpload = await window.gospelwaveDB.storage
+        .from("music-files")
+        .upload(audioPath, audio);
+
+      if (audioUpload.error) throw audioUpload.error;
+
+      if (cover) {
+        coverPath = folder + "/" + fileBase + "-" +
+          cover.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+        const coverUpload = await window.gospelwaveDB.storage
+          .from("album-artwork")
+          .upload(coverPath, cover);
+
+        if (coverUpload.error) throw coverUpload.error;
+      }
+
+      rightsPath = folder + "/" + fileBase + "-" +
+        documentFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+      const rightsUpload = await window.gospelwaveDB.storage
+        .from("rights-documents")
+        .upload(rightsPath, documentFile);
+
+      if (rightsUpload.error) throw rightsUpload.error;
+
+      const { data: song, error: songError } = await window.gospelwaveDB
+        .from("songs")
+        .insert({
+          artist_id: artistId,
+          genre_id: document.getElementById("gw-song-genre").value,
+          submitted_by: currentUser.id,
+          title: document.getElementById("gw-song-title").value.trim(),
+          description: document.getElementById("gw-song-description").value.trim(),
+          country: document.getElementById("gw-song-country").value.trim(),
+          language: document.getElementById("gw-song-language").value.trim(),
+          audio_file_path: audioPath,
+          cover_image: coverPath,
+          download_type: downloadType,
+          download_price: downloadType === "paid" ? price : 0,
+          currency: document.getElementById("gw-song-currency").value.trim().toUpperCase(),
+          submission_source: "artist",
+          status: "pending"
+        })
+        .select("id")
+        .single();
+
+      if (songError) throw songError;
+
+      const { error: rightsError } = await window.gospelwaveDB
+        .from("music_rights")
+        .insert({
+          song_id: song.id,
+          rights_holder_name: document.getElementById("gw-rights-holder").value.trim(),
+          recording_rights_confirmed: document.getElementById("gw-recording-rights").checked,
+          composition_rights_confirmed: document.getElementById("gw-composition-rights").checked,
+          download_permission_confirmed: document.getElementById("gw-download-rights").checked,
+          territory_permissions: document.getElementById("gw-territories").value.trim(),
+          document_path: rightsPath,
+          review_status: "pending"
+        });
+
+      if (rightsError) throw rightsError;
+
+      result.textContent =
+        "Your song and rights documents have been submitted successfully. They are awaiting administrator review.";
+
+      form.reset();
+
+    } catch (error) {
+      result.textContent = "Submission failed: " + error.message;
+    } finally {
+      form.querySelector("button[type='submit']").disabled = false;
+    }
+  });
+}
+
+
